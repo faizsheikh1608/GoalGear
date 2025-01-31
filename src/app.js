@@ -6,7 +6,8 @@ const cartRouter = require('./router/cartRouter.js')
 const reviewRouter = require('./router/reviewRouter.js')
 const searchRouter = require('./router/searchRouter.js')
 const cookieParser = require("cookie-parser")
-const cors = require('cors')
+
+onst cors = require('cors')
 
 
 const app = express();

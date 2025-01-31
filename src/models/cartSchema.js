@@ -16,6 +16,10 @@ const cartSchema = mongoose.Schema({
     required : true,
     default : 1,
   },
+  size : {
+type : String,
+required : true
+  },
   status : {
     type : String,
     enum : {
@@ -27,7 +31,7 @@ const cartSchema = mongoose.Schema({
   }
 });
 
-cartSchema.index({userId : 1 , productId : 1})
+cartSchema.index({userId : 1 , productId : 1},{unique :true})
 
 
 const Storecart = mongoose.model("Storecart",cartSchema);

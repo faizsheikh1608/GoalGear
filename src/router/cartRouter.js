@@ -13,9 +13,11 @@ cartRouter.post("/cart/addItem",userAuth, async(req,res) =>{
   try{
 
   
-  const {productId,status} = req.body;
+  const {productId,status,size} = req.body;
 
-  if(!productId || !status ){
+  qty = !req.body.qty ? 1 : qty;
+
+  if(!productId || !status || size){
     throw new Error("Please add all the field!")
   }
 
@@ -32,7 +34,7 @@ cartRouter.post("/cart/addItem",userAuth, async(req,res) =>{
   })
 
   if(isExisting){
-    throw new Error("Item already Existing");
+    throw new Error("Item already Added");
   }
 
   if("notPlaced" !== status){
@@ -42,6 +44,8 @@ cartRouter.post("/cart/addItem",userAuth, async(req,res) =>{
   const cart = new Storecart({
     userId : req.user._id,
     productId,
+    qty,
+    size,
     status,
   })
 

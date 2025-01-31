@@ -114,14 +114,14 @@ productRouter.post('/product/add' , async (req,res) => {
 //particular product
 productRouter.get("/product/:productId",async(req,res) => {
     try{
-        const {productId} = req.params;
+        const {productId} =  req.params;
 
         if(!mongoose.Types.ObjectId.isValid(productId)){
             throw new Error('Please provide productId')
         }
 
         const product = await Product.findById({_id : productId});
-
+  
         if(!product){
             throw new error("Product is Not Found")
         }

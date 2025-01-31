@@ -70,20 +70,11 @@ const productSchema = new Schema({
     size : {
         type : [String],
         enum : {
-            values : ['S','M',"L",'XL'],
+            values : ['S','M',"L",'XL','7','8','9',10],
             message : `{VALUE} is not valid`,
         },
        
-    },
-    shoeSize : {
-        type : [Number],
-        enum : {
-            values : [6,7,8,9,10],
-            message : `{VALUE} is not valid`,
-        },
-        
-        
-    }
+    }       
 
 })
 
