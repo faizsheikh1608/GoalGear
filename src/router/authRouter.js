@@ -38,13 +38,13 @@ authRouter.post('/login',async (req,res) => {
         const user = await User.findOne({emailId})
         
         if(!user){
-            throw new Error("Invalid credentials");
+            throw new Error("email credentials");
         }
     
         const isPasswordValid = await bcrypt.compare(password,user.password);
     
         if(!isPasswordValid){
-            throw new Error("Invalid credentials")
+            throw new Error("password credentials")
         }
     
         const token = jwt.sign({_id : user._id}, Secret_Key ,{
@@ -54,11 +54,13 @@ authRouter.post('/login',async (req,res) => {
       
     
         res.cookie("token" , token);
-        res.send("Login Successfully...");  
+        res.json({user,message : "Login Successfully..."});  
     }catch(err){
         res.status(400).send("ERROR : "+err);
     }
 })
+
+
 
 //Logout
 authRouter.post("/logout",userAuth,async (req,res) =>{
