@@ -15,9 +15,9 @@ cartRouter.post("/cart/addItem",userAuth, async(req,res) =>{
   
   const {productId,status,size} = req.body;
 
-  qty = !req.body.qty ? 1 : qty;
+  const quantity = !req.body.quantity ? 1 : req.body.quantity;
 
-  if(!productId || !status || size){
+  if(!productId || !status || !size){
     throw new Error("Please add all the field!")
   }
 
@@ -44,7 +44,7 @@ cartRouter.post("/cart/addItem",userAuth, async(req,res) =>{
   const cart = new Storecart({
     userId : req.user._id,
     productId,
-    qty,
+    quantity,
     size,
     status,
   })

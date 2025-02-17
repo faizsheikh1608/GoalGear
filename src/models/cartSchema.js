@@ -1,39 +1,37 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const cartSchema = mongoose.Schema({
-  userId : {
-    type : mongoose.Schema.Types.ObjectId,
-    required : true,
-    ref : "User",
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'User',
   },
-  productId : {
-    type : mongoose.Schema.Types.ObjectId,
-    required : true,
-    ref : "Product",
+  productId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'Product',
   },
-  quantity : {
-    type : Number,
-    required : true,
-    default : 1,
+  quantity: {
+    type: Number,
+    required: true,
+    default: 1,
   },
-  size : {
-type : String,
-required : true
+  size: {
+    type: String,
+    required: true,
   },
-  status : {
-    type : String,
-    enum : {
-      values : ["placed" , "notPlaced"],
-      message : "{VALUE} is not valid"
+  status: {
+    type: String,
+    enum: {
+      values: ['placed', 'notPlaced'],
+      message: '{VALUE} is not valid',
     },
-    default : "notPlaced",
-
+    default: 'notPlaced',
   }
 });
 
-cartSchema.index({userId : 1 , productId : 1},{unique :true})
+cartSchema.index({ userId: 1, productId: 1 }, { unique: true });
 
-
-const Storecart = mongoose.model("Storecart",cartSchema);
+const Storecart = mongoose.model('Storecart', cartSchema);
 
 module.exports = Storecart;

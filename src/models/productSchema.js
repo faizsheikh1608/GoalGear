@@ -61,7 +61,7 @@ const productSchema = new Schema({
     category : {
         type : String,
         enum : {
-            values : ['Shoes','Socks',"T-Shirts",'Shorts','Assecceires','Tracksuit'],
+            values : ['Shoes','Socks',"T-Shirts",'Shorts','Assecceires','Tracksuit','Football'],
             message : `{VALUE} is not a valid role`,
         },
         trim : true,
