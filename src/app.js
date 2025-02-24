@@ -6,8 +6,9 @@ const cartRouter = require('./router/cartRouter.js');
 const reviewRouter = require('./router/reviewRouter.js');
 const searchRouter = require('./router/searchRouter.js');
 const profileRouter = require('./router/profileRouter.js');
+const paymentRouter = require('./router/paymentRouter.js');
 const cookieParser = require('cookie-parser');
-
+require("dotenv").config({ path: "key.env" });
 const cors = require('cors');
 
 const app = express();
@@ -16,10 +17,11 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
+
 //cors
 app.use(
   cors({
-    origin: 'http://localhost:1234',
+    origin: 'http://localhost:5173',
     credentials: true,
   })
 );
@@ -31,6 +33,7 @@ app.use('/', cartRouter);
 app.use('/', reviewRouter);
 app.use('/', searchRouter);
 app.use('/', profileRouter);
+app.use('/', paymentRouter);
 
 connectDB().then(() => {
   console.log('Database connection Successfull....');

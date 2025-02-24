@@ -103,4 +103,23 @@ cartRouter.get("/cart/getItems" , userAuth , async(req,res) => {
 })
 
 
+//clear cart
+cartRouter.delete('/cart/clear',userAuth,async (req,res)=>{
+  try{
+    const userId = req.user._id;
+
+    // Delete all cart items for the user
+    const deletedItems = await Storecart.deleteMany({ userId });
+
+    if (deletedItems.deletedCount === 0) {
+      throw new Error("Cart is already empty");
+    }
+
+    res.json({ message: "Cart cleared successfully!" });
+
+  }catch(err){
+    res.status(400).json({error : error.message})
+  }
+})
+
 module.exports = cartRouter
