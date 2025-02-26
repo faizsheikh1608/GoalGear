@@ -21,7 +21,7 @@ app.use(cookieParser());
 //cors
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin: 'https://imaginative-puppy-a4642f.netlify.app',
     credentials: true,
   })
 );
