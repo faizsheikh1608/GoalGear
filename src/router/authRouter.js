@@ -53,7 +53,11 @@ authRouter.post('/login',async (req,res) => {
 
       
     
-        res.cookie("token" , token);
+        res.cookie("token" , token,{
+            httpOnly: true, 
+            secure: true,   
+            sameSite: "None", 
+        });
         res.json({user,message : "Login Successfully..."});  
     }catch(err){
         res.status(400).send("ERROR : "+err);
