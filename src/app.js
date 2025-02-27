@@ -21,7 +21,7 @@ app.use(cookieParser());
 //cors
 app.use(
   cors({
-    origin:["http://localhost:3000", "https://your-deployed-frontend.com"],
+    origin:["http://localhost:3000", "https://imaginative-puppy-a4642f.netlify.app/"],
     credentials: true,
     
   })
