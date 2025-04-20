@@ -1,9 +1,14 @@
 require('dotenv').config({ path: 'key.env' });
 const express = require('express');
 const Razorpay = require('razorpay');
-const crypto = require('crypto');
+const User = require('../models/userSchema');
 const userAuth = require('../middleware/userAuth');
 const Payment = require('../models/paymentSchema');
+const {
+  validateWebhookSignature,
+} = require('razorpay/dist/utils/razorpay-utils');
+const Storecart = require('../models/cartSchema');
+const { OrderedBulkOperation } = require('mongodb');
 
 const paymentRouter = express.Router();
 
@@ -21,7 +26,9 @@ paymentRouter.post('/create-order', userAuth, async (req, res) => {
     const user = req.user;
 
     if (!amount || !currency) {
-      return res.status(400).json({ error: 'Amount and currency are required.' });
+      return res
+        .status(400)
+        .json({ error: 'Amount and currency are required.' });
     }
 
     const order = await razorpay.orders.create({
@@ -50,6 +57,67 @@ paymentRouter.post('/create-order', userAuth, async (req, res) => {
     const data = await payment.save();
 
     res.json({ data });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+//Payment webhook
+paymentRouter.post('/payment/webhook', async (req, res) => {
+  try {
+    //web hook signatue comes is req header
+    const webhookSignature = req.get('X-Razorpay-Signature');
+
+    const isWebhookValid = validateWebhookSignature(
+      JSON.stringify(req.body),
+      webhookSignature,
+      'Faiz@123'
+    );
+
+    if (!isWebhookValid) {
+      throw new Error('Invalid Web hooks signature');
+    }
+
+    const event = req.body.event;
+
+    if (event === 'payment.captured') {
+      console.log('Body : ', req.body);
+      const paymentData = req.body.payload.payment.entity;
+
+      console.log('paymentData :', paymentData);
+
+      // Example: extract order_id, email, amount, etc.
+      const { id, order_id, notes, amount, status } = paymentData;
+
+      const { emailId } = notes;
+
+      const user = await User.findOne({ emailId });
+
+      if (!user) throw new Error('User not found');
+
+      //cart items
+      const cartItems = await Storecart.find({ userId: user._id }).lean();;
+
+      const order = new OrderedBulkOperation({
+        userId: user._id,
+        items: [...cartItems],
+        totalAmount: amount/100,
+        paymentId: id,
+        orderId: order_id,
+      });
+
+      const orderData = await order.save();
+
+      console.log(
+        `Payment captured for order ${order_id} with amount ${amount / 100} INR`
+      );
+
+      res.status(200).json({ success: true });
+    } else {
+      res
+        .status(200)
+        .json({ success: true, message: `Unhandled event: ${event}` });
+    }
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
