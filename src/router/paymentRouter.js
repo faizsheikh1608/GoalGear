@@ -108,6 +108,8 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
 
       const orderData = await order.save();
 
+      console.log("Order : ", orderData)
+
       console.log(
         `Payment captured for order ${order_id} with amount ${amount / 100} INR`
       );
