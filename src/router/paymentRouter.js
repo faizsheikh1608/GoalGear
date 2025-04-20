@@ -8,7 +8,7 @@ const {
   validateWebhookSignature,
 } = require('razorpay/dist/utils/razorpay-utils');
 const Storecart = require('../models/cartSchema');
-const { OrderedBulkOperation } = require('mongodb');
+const { Order } = require('../models/orderSchema');
 
 const paymentRouter = express.Router();
 
@@ -116,7 +116,7 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
 
       console.log('formattedItems :', formattedItems);
 
-      const order = new OrderedBulkOperation({
+      const order = new Order{
         userId: user._id,
         items: formattedItems,
         totalAmount: amount / 100,
