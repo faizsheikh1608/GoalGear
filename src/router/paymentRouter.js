@@ -8,7 +8,7 @@ const {
   validateWebhookSignature,
 } = require('razorpay/dist/utils/razorpay-utils');
 const Storecart = require('../models/cartSchema');
-const Order  = require('../models/orderSchema');
+const Order = require('../models/orderSchema');
 
 const paymentRouter = express.Router();
 
@@ -78,23 +78,25 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
       throw new Error('Invalid Web hooks signature');
     }
 
+    //seting Status
+    const paymentData = req.body.payload.payment.entity;
+
+    const payment = Payment.findOne({ orderId: paymentData.order_id });
+    payment.status = paymentData.status;
+    await payment.save();
+
     const event = req.body.event;
 
+    //payment Success
     if (event === 'payment.captured') {
-      
       const paymentData = req.body.payload.payment.entity;
 
-    
       // Example: extract order_id, email, amount, etc.
       const { id, order_id, notes, amount, status } = paymentData;
 
       const { emailId } = notes;
 
-      
-
       const user = await User.findOne({ emailId });
-
-      
 
       if (!user) throw new Error('User not found');
 
@@ -103,8 +105,6 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
         .populate('productId', 'productName price')
         .lean();
 
-      
-
       const formattedItems = cartItems.map((item) => ({
         productId: item.productId._id,
         productName: item.productId.productName,
@@ -112,8 +112,6 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
         size: item.size,
         price: item.productId.price,
       }));
-
-      
 
       const order = new Order({
         userId: user._id,
@@ -125,18 +123,33 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
 
       const orderData = await order.save();
 
-      await Storecart.deleteMany({userId : user._id})
+      await Storecart.deleteMany({ userId: user._id });
 
       console.log(
         `Payment captured for order ${order_id} with amount ${amount / 100} INR`
       );
 
-      res.status(200).json({ success: true });
-    } else {
-      res
-        .status(200)
-        .json({ success: true, message: `Unhandled event: ${event}` });
+      return res.status(200).json({ success: true });
     }
+
+    //payment Failed
+    if (event === 'payment.failed') {
+      const failedPayment = req.body.payload.payment.entity;
+      const { id, order_id, notes, error_reason, amount } = failedPayment;
+      const { emailId } = notes;
+
+      console.log(
+        `Payment failed for order ${order_id}, email: ${emailId}, reason: ${error_reason}`
+      );
+
+      return res
+        .status(200)
+        .json({ success: false, message: 'Payment failed event handled' });
+    }
+
+    res
+      .status(200)
+      .json({ success: true, message: `Unhandled event: ${event}` });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
