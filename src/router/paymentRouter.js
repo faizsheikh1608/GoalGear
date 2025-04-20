@@ -96,19 +96,27 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
       if (!user) throw new Error('User not found');
 
       //cart items
-      const cartItems = await Storecart.find({ userId: user._id }).lean();;
+      const cartItems = await Storecart.find({ userId: user._id }).lean();
+
+      const formattedItems = cartItems.map((item) => ({
+        productId: item.productId,
+        name: item.name,
+        quantity: item.quantity,
+        size: item.size,
+        price: item.price,
+      }));
 
       const order = new OrderedBulkOperation({
         userId: user._id,
-        items: [...cartItems],
-        totalAmount: amount/100,
+        items: [...formattedItems],
+        totalAmount: amount / 100,
         paymentId: id,
         orderId: order_id,
       });
 
       const orderData = await order.save();
 
-      console.log("Order : ", orderData)
+      console.log('Order : ', orderData);
 
       console.log(
         `Payment captured for order ${order_id} with amount ${amount / 100} INR`
