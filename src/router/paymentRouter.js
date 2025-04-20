@@ -1,12 +1,56 @@
+require('dotenv').config({ path: 'key.env' });
 const express = require('express');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
-require('dotenv').config({ path: 'key.env' });
+const userAuth = require('../middleware/userAuth');
+const Payment = require('../models/paymentSchema');
 
 const paymentRouter = express.Router();
+
 console.log('Razorpay Key ID:', process.env.RAZORPAY_KEY_ID);
 console.log('Razorpay Key Secret:', process.env.RAZORPAY_KEY_SECRET);
 
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
+
+paymentRouter.post('/create-order', userAuth, async (req, res) => {
+  try {
+    const { amount, currency } = req.body;
+    const user = req.user;
+
+    const order = await razorpay.orders.create({
+      amount: amount * 100,
+      currency,
+      receipt: `receipt_${Date.now()}`,
+      notes: {
+        name: user.firstName + ' ' + user.lastName,
+        emailId: user.emailId,
+        mobile_no: user.mobileNo,
+      },
+    });
+
+    //save in dataBase
+
+    const payment = new Payment({
+      userId: req.user._id,
+      status: order.status,
+      amount: order.amount / 100,
+      orderId: order.id,
+      currency: order.currency,
+      receipt: order.receipt,
+      notes: order.notes,
+    });
+
+    const data = await payment.save();
+
+    res.json({ data });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+/*
 // Initialize Razorpay
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -54,5 +98,7 @@ paymentRouter.post('/verify-payment', (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+*/
 
 module.exports = paymentRouter;
