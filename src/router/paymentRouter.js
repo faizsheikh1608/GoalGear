@@ -8,7 +8,7 @@ const {
   validateWebhookSignature,
 } = require('razorpay/dist/utils/razorpay-utils');
 const Storecart = require('../models/cartSchema');
-const { Order } = require('../models/orderSchema');
+const Order  = require('../models/orderSchema');
 
 const paymentRouter = express.Router();
 
