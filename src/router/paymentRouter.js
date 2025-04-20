@@ -91,6 +91,8 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
 
       const { emailId } = notes;
 
+      console.log('Email from Notes:', emailId);
+
       const user = await User.findOne({ emailId });
 
       console.log('User :', user);
