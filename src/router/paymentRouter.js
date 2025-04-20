@@ -20,6 +20,10 @@ paymentRouter.post('/create-order', userAuth, async (req, res) => {
     const { amount, currency } = req.body;
     const user = req.user;
 
+    if (!amount || !currency) {
+      return res.status(400).json({ error: 'Amount and currency are required.' });
+    }
+
     const order = await razorpay.orders.create({
       amount: amount * 100,
       currency,
