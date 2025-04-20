@@ -81,21 +81,20 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
     const event = req.body.event;
 
     if (event === 'payment.captured') {
-      console.log('Body : ', req.body);
+      
       const paymentData = req.body.payload.payment.entity;
 
-      console.log('paymentData :', paymentData);
-
+    
       // Example: extract order_id, email, amount, etc.
       const { id, order_id, notes, amount, status } = paymentData;
 
       const { emailId } = notes;
 
-      console.log('Email from Notes:', emailId);
+      
 
       const user = await User.findOne({ emailId });
 
-      console.log('User :', user);
+      
 
       if (!user) throw new Error('User not found');
 
@@ -104,7 +103,7 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
         .populate('productId', 'productName price')
         .lean();
 
-      console.log('cartItems :', cartItems);
+      
 
       const formattedItems = cartItems.map((item) => ({
         productId: item.productId._id,
@@ -114,9 +113,9 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
         price: item.productId.price,
       }));
 
-      console.log('formattedItems :', formattedItems);
+      
 
-      const order = new Order{
+      const order = new Order({
         userId: user._id,
         items: formattedItems,
         totalAmount: amount / 100,
