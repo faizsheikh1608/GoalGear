@@ -93,10 +93,14 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
 
       const user = await User.findOne({ emailId });
 
+      console.log('User :', user);
+
       if (!user) throw new Error('User not found');
 
       //cart items
       const cartItems = await Storecart.find({ userId: user._id }).lean();
+
+      console.log('cartItems :', cartItems);
 
       const formattedItems = cartItems.map((item) => ({
         productId: item.productId,
@@ -105,6 +109,8 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
         size: item.size,
         price: item.price,
       }));
+
+      console.log('formattedItems :', formattedItems);
 
       const order = new OrderedBulkOperation({
         userId: user._id,
