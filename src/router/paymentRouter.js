@@ -107,7 +107,7 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
       console.log('cartItems :', cartItems);
 
       const formattedItems = cartItems.map((item) => ({
-        productId: item.productId,
+        productId: item.productId._id,
         productName: item.productId.productName,
         quantity: item.quantity,
         size: item.size,
