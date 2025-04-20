@@ -108,7 +108,7 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
 
       const order = new OrderedBulkOperation({
         userId: user._id,
-        items: [...formattedItems],
+        items: formattedItems,
         totalAmount: amount / 100,
         paymentId: id,
         orderId: order_id,
