@@ -162,7 +162,7 @@ paymentRouter.get('/payment/status', userAuth, async (req, res) => {
 
     const payment = await Payment.findOne({ orderId });
 
-    if (payment.status === 'capture') {
+    if (payment?.status === 'captured') {
       return res.json({ payment: true });
     }
 
