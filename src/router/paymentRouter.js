@@ -156,7 +156,7 @@ paymentRouter.get('/payment/status', userAuth, async (req, res) => {
   try {
     const { orderId } = req.query;
 
-    if (!paymentId) {
+    if (!orderId) {
       return res.status(400).json({ message: 'Payment ID is required' });
     }
 
