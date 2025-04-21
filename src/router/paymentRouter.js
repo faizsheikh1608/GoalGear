@@ -154,7 +154,7 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
 
 paymentRouter.get('/payment/status', userAuth, async (req, res) => {
   try {
-    const { orderId } = req.body;
+    const { orderId } = req.query;
 
     if (!paymentId) {
       return res.status(400).json({ message: 'Payment ID is required' });
