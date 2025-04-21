@@ -167,7 +167,7 @@ paymentRouter.get('/payment/status', userAuth, async (req, res) => {
     console.log('Payment ', payment);
 
     if (payment?.status === 'captured') {
-      console.log(payment.status);
+      console.log("payment pass :",payment.status);
       return res.json({ payment: true });
     }
 
