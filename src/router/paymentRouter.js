@@ -152,7 +152,7 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
   }
 });
 
-paymentRouter.get('/payment/status', userAuth, async (req, res) => {
+paymentRouter.post('/payment/status', userAuth, async (req, res) => {
   try {
     const { orderId } = req.query;
 
@@ -163,6 +163,10 @@ paymentRouter.get('/payment/status', userAuth, async (req, res) => {
     }
 
     const payment = await Payment.findOne({ orderId });
+
+    if (!payment) {
+      return res.status(404).json({ payment: false, message: 'Payment not found' });
+    }
 
     console.log('Payment ', payment);
 
