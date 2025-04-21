@@ -154,13 +154,13 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
 
 paymentRouter.get('/payment/status', userAuth, async (req, res) => {
   try {
-    const { paymentId } = req.body;
+    const { orderId } = req.body;
 
     if (!paymentId) {
       return res.status(400).json({ message: 'Payment ID is required' });
     }
 
-    const payment = await Payment.findOne({ paymentId });
+    const payment = await Payment.findOne({ orderId });
 
     if (payment.status === 'capture') {
       return res.json({ payment: true });
