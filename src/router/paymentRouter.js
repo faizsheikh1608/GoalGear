@@ -156,15 +156,22 @@ paymentRouter.get('/payment/status', userAuth, async (req, res) => {
   try {
     const { orderId } = req.query;
 
+    console.log(orderId);
+
     if (!orderId) {
-      return res.status(400).json({ message: 'Payment ID is required' });
+      return res.status(400).json({ message: 'Order ID is required' });
     }
 
     const payment = await Payment.findOne({ orderId });
 
+    console.log('Payment ', payment);
+
     if (payment?.status === 'captured') {
+      console.log(payment.status);
       return res.json({ payment: true });
     }
+
+    console.log('payment failed', payment.status);
 
     res.json({ payment: false });
   } catch (err) {
