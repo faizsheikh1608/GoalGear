@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-
 const orderSchema = new mongoose.Schema(
   {
     userId: {
@@ -27,6 +26,11 @@ const orderSchema = new mongoose.Schema(
         price: {
           type: String,
         },
+        status: {
+          type: String,
+          enum: ['pending', 'confirmed', 'shipped', 'delivered'],
+          default: 'confirmed',
+        },
       },
     ],
     totalAmount: {
@@ -35,11 +39,6 @@ const orderSchema = new mongoose.Schema(
     },
     paymentId: String,
     orderId: String,
-    status: {
-      type: String,
-      enum: ['pending', 'confirmed', 'shipped', 'delivered'],
-      default: 'confirmed',
-    },
   },
   { timestamps: true }
 );
