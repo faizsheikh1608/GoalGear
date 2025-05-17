@@ -23,6 +23,9 @@ const orderSchema = new mongoose.Schema(
         size: {
           type: String,
         },
+        mainImageUrl: {
+          type: String,
+        },
         price: {
           type: String,
         },
