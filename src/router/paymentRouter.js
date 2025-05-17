@@ -99,13 +99,13 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
 
       //cart items
       const cartItems = await Storecart.find({ userId: user._id })
-        .populate('productId', 'productName price mainImageUrl')
+        .populate('productId', 'productName price color')
         .lean();
 
       const formattedItems = cartItems.map((item) => ({
         productId: item.productId._id,
         productName: item.productId.productName,
-        mainImageUrl: item.mainImageUrl,
+        mainImageUrl: item.color.mainImageUrl,
         quantity: item.quantity,
         size: item.size,
         price: item.productId.price,
