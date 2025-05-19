@@ -11,13 +11,19 @@ orderRouter.get('/orders', userAuth, async (req, res) => {
     const LIMIT = 5;
     const skip = (page - 1) * LIMIT;
 
-    const data = await Order.find({ userId: user._id }).sort({ createdAt: -1 }) .skip(skip).limit(LIMIT);
+    const totalPages = await Order.countDocuments({ userId: user._id });
+    const data = await Order.find({ userId: user._id })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(LIMIT);
 
     if (!data) {
       return res.status(404).json({ message: 'Data not found' });
     }
 
-    res.json({ data });
+    totalPages = Math.ceil(totalPages / LIMIT);
+
+    res.json({ data, currentPage: Number(page), totalPages });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
