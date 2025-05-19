@@ -7,7 +7,7 @@ const searchRouter = express.Router();
 //Searching
 searchRouter.get('/search/product', async (req, res) => {
   try {
-    const { query, page = 1, limit = 6 } = req.query;
+    const { query, page = 1, limit = 8 } = req.query;
 
     if (!query) {
       return res
