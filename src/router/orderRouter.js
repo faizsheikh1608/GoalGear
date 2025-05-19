@@ -7,8 +7,11 @@ const orderRouter = express.Router();
 orderRouter.get('/orders', userAuth, async (req, res) => {
   try {
     const user = req.user;
+    const { page } = req.query;
+    const LIMIT = 5;
+    const skip = (page - 1) * LIMIT;
 
-    const data = await Order.find({ userId: user._id });
+    const data = await Order.find({ userId: user._id }).skip(skip).limit(LIMIT);
 
     if (!data) {
       return res.status(404).json({ message: 'Data not found' });

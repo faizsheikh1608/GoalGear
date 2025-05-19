@@ -7,7 +7,7 @@ const searchRouter = express.Router();
 //Searching
 searchRouter.get('/search/product', async (req, res) => {
   try {
-    const { query } = req.query;
+    const { query, page = 1, limit = 6 } = req.query;
 
     if (!query) {
       return res
@@ -25,7 +25,7 @@ searchRouter.get('/search/product', async (req, res) => {
         'category',
         'description.descriptionHeading',
         'description.descriptionData',
-        'color.colorName'
+        'color.colorName',
       ],
     };
 
@@ -44,17 +44,31 @@ searchRouter.get('/search/product', async (req, res) => {
 
     let formattedResult = result.map((item) => item.item);
 
-    const exactMatches = formattedResult.filter(product =>
+    const exactMatches = formattedResult.filter((product) =>
       product.productName.toLowerCase().includes(query.toLowerCase())
     );
 
-    const otherMatches = formattedResult.filter(product =>
-      !product.productName.toLowerCase().includes(query.toLowerCase())
+    const otherMatches = formattedResult.filter(
+      (product) =>
+        !product.productName.toLowerCase().includes(query.toLowerCase())
     );
 
     formattedResult = [...exactMatches, ...otherMatches];
 
-    res.json({ products: formattedResult });
+    // Pagination
+    const startIndex = (parseInt(page) - 1) * parseInt(limit);
+    const endIndex = startIndex + parseInt(limit);
+    const paginatedProducts = formattedResult.slice(startIndex, endIndex);
+
+    const totalCount = formattedResult.length;
+    const totalPages = Math.ceil(totalCount / limit);
+
+    res.json({
+      products: paginatedProducts,
+      currentPage: parseInt(page),
+      totalPages,
+      totalCount,
+    });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }

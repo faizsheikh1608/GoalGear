@@ -8,7 +8,7 @@ const productRouter = express.Router();
 productRouter.get('/allProducts', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const LIMIT = 3;
+    const LIMIT = 12;
     const skip = (page - 1) * LIMIT;
 
     //get total count
