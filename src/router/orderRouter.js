@@ -7,11 +7,11 @@ const orderRouter = express.Router();
 orderRouter.get('/orders', userAuth, async (req, res) => {
   try {
     const user = req.user;
-    const { page } = req.query;
+    const page = Math.max(1, parseInt(req.query.page)) || 1;
     const LIMIT = 5;
     const skip = (page - 1) * LIMIT;
 
-    let totalPages = await Order.countDocuments({ userId: user._id });
+    let totalOrders = await Order.countDocuments({ userId: user._id });
     const data = await Order.find({ userId: user._id })
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -21,7 +21,7 @@ orderRouter.get('/orders', userAuth, async (req, res) => {
       return res.status(404).json({ message: 'Data not found' });
     }
 
-    totalPages = Math.ceil(totalPages / LIMIT);
+    let totalPages = Math.ceil(totalOrders / LIMIT);
 
     res.json({ data, currentPage: Number(page), totalPages });
   } catch (err) {
