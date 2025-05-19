@@ -11,7 +11,7 @@ orderRouter.get('/orders', userAuth, async (req, res) => {
     const LIMIT = 5;
     const skip = (page - 1) * LIMIT;
 
-    const totalPages = await Order.countDocuments({ userId: user._id });
+    let totalPages = await Order.countDocuments({ userId: user._id });
     const data = await Order.find({ userId: user._id })
       .sort({ createdAt: -1 })
       .skip(skip)
