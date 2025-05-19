@@ -11,7 +11,7 @@ orderRouter.get('/orders', userAuth, async (req, res) => {
     const LIMIT = 5;
     const skip = (page - 1) * LIMIT;
 
-    const data = await Order.find({ userId: user._id }).skip(skip).limit(LIMIT);
+    const data = await Order.find({ userId: user._id }).sort({ createdAt: -1 }) .skip(skip).limit(LIMIT);
 
     if (!data) {
       return res.status(404).json({ message: 'Data not found' });
