@@ -70,7 +70,7 @@ const productSchema = new Schema({
     size : {
         type : [String],
         enum : {
-            values : ['S','M',"L",'XL','7','8','9',10],
+            values : ['S','M',"L",'XL','3','4'.'5','6','7','8','9','10'],
             message : `{VALUE} is not valid`,
         },
        
