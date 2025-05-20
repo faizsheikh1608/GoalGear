@@ -59,7 +59,7 @@ productRouter.post('/product/add', async (req, res) => {
       req.body;
 
     if (!productName || !price || !stock || !color || !category) {
-      throw new Error({ message: 'All required fields must be provided' });
+      throw new Error('All required fields must be provided' );
     }
 
     if (
