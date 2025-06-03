@@ -41,4 +41,26 @@ orderRouter.get('/orders', userAuth, async (req, res) => {
   }
 });
 
+orderRouter.put('/orders/:id/:productId', userAuth, async (req, res) => {
+  try {
+    const { id, productId } = req.params;
+    const { status } = req.body;
+
+    if (!id) {
+      throw new Error('Invalid Id');
+    }
+
+    const order = await Order.findById(id);
+    const product = order.items.find((ele) => ele.productId.equals(productId));
+
+    if (!product) throw new Error('No data found');
+    if (status) product.status = status;
+
+    await order.save();
+    res.json({ message: 'Status updated successfully' });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 module.exports = orderRouter;
