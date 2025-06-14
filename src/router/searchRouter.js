@@ -85,9 +85,9 @@ searchRouter.get("/search/order", async (req, res) => {
 
     const data = await Order.find();
 
-    console.log(data);
+    console.log(data, data.items);
 
-    const orders = data.items.filter((ele) => ele.productName.includes(query));
+    const orders = data.filter((ele) => ele.items.productName.includes(query));
 
     if (!orders) {
       return res.status.json({ message: err.message });
