@@ -1,18 +1,19 @@
-const express = require('express');
-const Fuse = require('fuse.js');
-const { Product } = require('../models/productSchema');
+const express = require("express");
+const Fuse = require("fuse.js");
+const { Product } = require("../models/productSchema");
+const { Order } = require("../models/orderSchema");
 
 const searchRouter = express.Router();
 
 //Searching
-searchRouter.get('/search/product', async (req, res) => {
+searchRouter.get("/search/product", async (req, res) => {
   try {
     const { query, page = 1, limit = 8 } = req.query;
 
     if (!query) {
       return res
         .status(400)
-        .json({ message: 'Please provide a search query!' });
+        .json({ message: "Please provide a search query!" });
     }
 
     const products = await Product.find();
@@ -21,11 +22,11 @@ searchRouter.get('/search/product', async (req, res) => {
       includeScore: true,
       threshold: 0.3,
       keys: [
-        'productName',
-        'category',
-        'description.descriptionHeading',
-        'description.descriptionData',
-        'color.colorName',
+        "productName",
+        "category",
+        "description.descriptionHeading",
+        "description.descriptionData",
+        "color.colorName",
       ],
     };
 
@@ -39,7 +40,7 @@ searchRouter.get('/search/product', async (req, res) => {
     }
 
     if (result.length === 0) {
-      throw new Error('No products found for your query');
+      throw new Error("No products found for your query");
     }
 
     let formattedResult = result.map((item) => item.item);
@@ -69,6 +70,28 @@ searchRouter.get('/search/product', async (req, res) => {
       totalPages,
       totalCount,
     });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+searchRouter.get("/search/order", async (req, res) => {
+  try {
+    const query = req.query;
+
+    if (!query) {
+      return res.status(404).json({ messgae: "No query found" });
+    }
+
+    const data = await Order.find();
+
+    const orders = data.items.filter((ele) => ele.productName.includes(query));
+
+    if (!orders) {
+      return res.status.json({ message: err.message });
+    }
+
+    res.json({ orders });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
