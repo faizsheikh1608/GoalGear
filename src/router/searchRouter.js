@@ -112,7 +112,7 @@ searchRouter.get('/search/order', async (req, res) => {
     }
 
     if (result.length === 0) {
-      throw new Error('No matching orders found');
+      throw new Error('No matching orders found !');
     }
 
     let formattedResult = result.map((item) => item.item.original);
