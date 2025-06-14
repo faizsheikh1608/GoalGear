@@ -75,50 +75,48 @@ searchRouter.get('/search/product', async (req, res) => {
 });
 
 // SEARCH ORDERS by query string
-searchRouter.get('/search/order', async (req, res) => {
+searchRouter.get('/search/order', userAuth, async (req, res) => {
   try {
     const { query, page = 1, limit = 8 } = req.query;
 
     if (!query) {
-      return res
-        .status(400)
-        .json({ message: 'Please provide a search query!' });
+      return res.status(400).json({ message: 'Please provide a search query!' });
     }
 
-    const orders = await Order.find();
+    // 🔐 Get only orders of the logged-in user
+    const orders = await Order.find({ userId: req.user._id });
 
     const searchableOrders = orders.map((order) => ({
       _id: order._id,
       orderId: order.orderId || order._id.toString(),
-      itemsString: order.items.map((item) => item.productName).join(' '),
+      itemsString: order.items.map((item) => item.productName?.toLowerCase()).join(' '),
       items: order.items,
       original: order,
     }));
 
     const options = {
       includeScore: true,
-      threshold: 0.3,
+      threshold: 0.4, // allows minor typos
       keys: ['orderId', 'itemsString'],
     };
 
     let fuse = new Fuse(searchableOrders, options);
-    let result = fuse.search(query);
+    let result = fuse.search(query.toLowerCase());
 
-    // Loosen threshold if no match
+    // Retry with looser threshold if no match
     if (result.length === 0) {
-      options.threshold = 0.5;
+      options.threshold = 0.6;
       fuse = new Fuse(searchableOrders, options);
-      result = fuse.search(query);
+      result = fuse.search(query.toLowerCase());
     }
 
     if (result.length === 0) {
-      throw new Error('No matching orders found!');
+      return res.status(404).json({ message: 'No matching orders found!' });
     }
 
-    // Extract matched orders
     let matchedOrders = result.map((item) => item.item.original);
 
-    // Prioritize exact matches
+    // ✅ Prioritize exact matches
     const exactMatches = matchedOrders.filter(
       (order) =>
         (order.orderId &&
@@ -136,7 +134,7 @@ searchRouter.get('/search/order', async (req, res) => {
 
     matchedOrders = [...exactMatches, ...otherMatches];
 
-    // 🔥 Flatten items
+    // 🔁 Flatten items for better pagination
     const allItems = matchedOrders.flatMap((order) =>
       order.items.map((item) => ({
         ...(item.toObject ? item.toObject() : item),
@@ -145,7 +143,7 @@ searchRouter.get('/search/order', async (req, res) => {
       }))
     );
 
-    // 🔢 Paginate
+    // 🔢 Pagination logic
     const totalItems = allItems.length;
     const totalPages = Math.ceil(totalItems / limit);
     const start = (page - 1) * limit;
@@ -161,5 +159,6 @@ searchRouter.get('/search/order', async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
+
 
 module.exports = searchRouter;
