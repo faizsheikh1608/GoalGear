@@ -85,6 +85,8 @@ searchRouter.get("/search/order", async (req, res) => {
 
     const data = await Order.find();
 
+    console.log(data);
+
     const orders = data.items.filter((ele) => ele.productName.includes(query));
 
     if (!orders) {
