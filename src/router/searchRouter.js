@@ -83,7 +83,9 @@ searchRouter.get("/search/order", async (req, res) => {
       return res.status(404).json({ messgae: "No query found" });
     }
 
-    const data = await Order.find();
+    const data = await Order.find({
+      $or: [{ productName: { $regex: query } }],
+    });
 
     console.log(data, data.items);
 
