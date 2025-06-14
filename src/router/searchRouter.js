@@ -87,12 +87,11 @@ searchRouter.get('/search/order', async (req, res) => {
 
     const orders = await Order.find();
 
-    // Prepare searchable data
     const searchableOrders = orders.map((order) => ({
       _id: order._id,
       orderId: order.orderId || order._id.toString(),
-      itemsString: order.items.map((item) => item.productName).join(' '), // for Fuse
-      items: order.items, // for post filtering
+      itemsString: order.items.map((item) => item.productName).join(' '),
+      items: order.items,
       original: order,
     }));
 
@@ -105,7 +104,7 @@ searchRouter.get('/search/order', async (req, res) => {
     let fuse = new Fuse(searchableOrders, options);
     let result = fuse.search(query);
 
-    // Retry with looser threshold if no results
+    // Loosen threshold if no match
     if (result.length === 0) {
       options.threshold = 0.5;
       fuse = new Fuse(searchableOrders, options);
@@ -116,11 +115,11 @@ searchRouter.get('/search/order', async (req, res) => {
       throw new Error('No matching orders found!');
     }
 
-    // Extract matched original orders
-    let formattedResult = result.map((item) => item.item.original);
+    // Extract matched orders
+    let matchedOrders = result.map((item) => item.item.original);
 
-    // Exact match boost
-    const exactMatches = formattedResult.filter(
+    // Prioritize exact matches
+    const exactMatches = matchedOrders.filter(
       (order) =>
         (order.orderId &&
           order.orderId.toLowerCase().includes(query.toLowerCase())) ||
@@ -131,25 +130,32 @@ searchRouter.get('/search/order', async (req, res) => {
         )
     );
 
-    const otherMatches = formattedResult.filter(
+    const otherMatches = matchedOrders.filter(
       (order) => !exactMatches.includes(order)
     );
 
-    formattedResult = [...exactMatches, ...otherMatches];
+    matchedOrders = [...exactMatches, ...otherMatches];
 
-    // Pagination
-    const startIndex = (parseInt(page) - 1) * parseInt(limit);
-    const endIndex = startIndex + parseInt(limit);
-    const paginatedOrders = formattedResult.slice(startIndex, endIndex);
+    // 🔥 Flatten items
+    const allItems = matchedOrders.flatMap((order) =>
+      order.items.map((item) => ({
+        ...(item.toObject ? item.toObject() : item),
+        orderCreatedAt: order.createdAt,
+        orderId: order._id.toString(),
+      }))
+    );
 
-    const totalCount = formattedResult.length;
-    const totalPages = Math.ceil(totalCount / limit);
+    // 🔢 Paginate
+    const totalItems = allItems.length;
+    const totalPages = Math.ceil(totalItems / limit);
+    const start = (page - 1) * limit;
+    const paginatedItems = allItems.slice(start, start + parseInt(limit));
 
     res.json({
-      orders: paginatedOrders,
+      data: paginatedItems,
       currentPage: parseInt(page),
       totalPages,
-      totalCount,
+      totalItems,
     });
   } catch (err) {
     res.status(400).json({ message: err.message });
