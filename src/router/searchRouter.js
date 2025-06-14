@@ -1,9 +1,78 @@
 const express = require('express');
 const Fuse = require('fuse.js');
 const { Product } = require('../models/productSchema');
-const { Order } = require('../models/orderSchema');
+const Order = require('../models/orderSchema');
 
 const searchRouter = express.Router();
+
+searchRouter.get('/search/product', async (req, res) => {
+  try {
+    const { query, page = 1, limit = 8 } = req.query;
+
+    if (!query) {
+      return res
+        .status(400)
+        .json({ message: 'Please provide a search query!' });
+    }
+
+    const products = await Product.find();
+
+    const options = {
+      includeScore: true,
+      threshold: 0.3,
+      keys: [
+        'productName',
+        'category',
+        'description.descriptionHeading',
+        'description.descriptionData',
+        'color.colorName',
+      ],
+    };
+
+    let fuse = new Fuse(products, options);
+    let result = fuse.search(query);
+
+    // Loosen threshold if nothing found
+    if (result.length === 0) {
+      options.threshold = 0.5;
+      fuse = new Fuse(products, options);
+      result = fuse.search(query);
+    }
+
+    if (result.length === 0) {
+      throw new Error('No products found for your query');
+    }
+
+    let formattedResult = result.map((item) => item.item);
+
+    const exactMatches = formattedResult.filter((product) =>
+      product.productName.toLowerCase().includes(query.toLowerCase())
+    );
+
+    const otherMatches = formattedResult.filter(
+      (product) => !exactMatches.includes(product)
+    );
+
+    formattedResult = [...exactMatches, ...otherMatches];
+
+    // Pagination
+    const startIndex = (parseInt(page) - 1) * parseInt(limit);
+    const endIndex = startIndex + parseInt(limit);
+    const paginatedProducts = formattedResult.slice(startIndex, endIndex);
+
+    const totalCount = formattedResult.length;
+    const totalPages = Math.ceil(totalCount / limit);
+
+    res.json({
+      products: paginatedProducts,
+      currentPage: parseInt(page),
+      totalPages,
+      totalCount,
+    });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
 
 // SEARCH ORDERS by query string
 searchRouter.get('/search/order', async (req, res) => {
