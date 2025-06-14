@@ -1,6 +1,7 @@
 const express = require('express');
 const Fuse = require('fuse.js');
 const { Product } = require('../models/productSchema');
+const Order = require('../models/orderSchema');
 
 const searchRouter = express.Router();
 
@@ -69,6 +70,34 @@ searchRouter.get('/search/product', async (req, res) => {
       totalPages,
       totalCount,
     });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+searchRouter.get('/search/order', async (req, res) => {
+  try {
+    const { query } = req.query;
+
+    if (!query) {
+      return res.status(400).json({ message: 'No query provided' });
+    }
+
+    // Fetch all orders (you could optimize this later with $elemMatch)
+    const allOrders = await Order.find();
+
+    // Filter orders where any item in the order includes the search term
+    const matchingOrders = allOrders.filter((order) =>
+      order.items.some((item) =>
+        item.productName.toLowerCase().includes(query.toLowerCase())
+      )
+    );
+
+    if (matchingOrders.length === 0) {
+      return res.status(404).json({ message: 'No matching orders found' });
+    }
+
+    res.json({ orders: matchingOrders });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
