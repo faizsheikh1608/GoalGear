@@ -1,7 +1,7 @@
 const express = require("express");
 const Fuse = require("fuse.js");
 const { Product } = require("../models/productSchema");
-const { Order } = require("../models/orderSchema");
+const Order = require("../models/orderSchema");
 
 const searchRouter = express.Router();
 
