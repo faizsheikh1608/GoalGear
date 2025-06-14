@@ -12,7 +12,7 @@ const Secret_Key = process.env.Secret_Key || 'Faiz@123';
 //Signup
 authRouter.post('/signup', async (req, res) => {
   try {
-    validateSignup(req);
+    // validateSignup(req);
 
     const { firstName, lastName, emailId, password, age, gender } = req.body;
 
