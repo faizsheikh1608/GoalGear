@@ -2,6 +2,7 @@ const express = require('express');
 const Fuse = require('fuse.js');
 const { Product } = require('../models/productSchema');
 const Order = require('../models/orderSchema');
+const userAuth = require('../middleware/userAuth');
 
 const searchRouter = express.Router();
 
@@ -80,7 +81,9 @@ searchRouter.get('/search/order', userAuth, async (req, res) => {
     const { query, page = 1, limit = 8 } = req.query;
 
     if (!query) {
-      return res.status(400).json({ message: 'Please provide a search query!' });
+      return res
+        .status(400)
+        .json({ message: 'Please provide a search query!' });
     }
 
     // 🔐 Get only orders of the logged-in user
@@ -89,7 +92,9 @@ searchRouter.get('/search/order', userAuth, async (req, res) => {
     const searchableOrders = orders.map((order) => ({
       _id: order._id,
       orderId: order.orderId || order._id.toString(),
-      itemsString: order.items.map((item) => item.productName?.toLowerCase()).join(' '),
+      itemsString: order.items
+        .map((item) => item.productName?.toLowerCase())
+        .join(' '),
       items: order.items,
       original: order,
     }));
@@ -159,6 +164,5 @@ searchRouter.get('/search/order', userAuth, async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
-
 
 module.exports = searchRouter;
